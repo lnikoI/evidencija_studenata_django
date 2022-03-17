@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">Studentska evidencija</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'studenti' %}">Studenti <span class="sr-only">(current)</span></a>
+                </li>
+                {% if rola == 'administrator' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'predmeti' %}">Predmeti</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'korisnici' %}" tabindex="-1" aria-disabled="true">Korisnici</a>
+                </li>
+                {% endif %}
+            </ul>
+            <a href="{% url 'logout' %}" class="btn btn-primary">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row my-5 justify-content-end">
+            {% if rola == 'administrator' %}
+            <a href="{% url 'student_novi' %}" role="button" class="btn btn-primary">Dodaj studenta</a>
+            {% endif %}
+            <a href="{% url 'export' tip='studenti' id=-1 %}" role="button" class="btn btn-success ml-3 mr-3">Export</a>
+        </div>
+        <div class="row">
+            <table class="table">
+
+                <form action="{% url 'studenti' %}" method="GET">
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                <div class="input-group input-group-sm">
+                                    <input value="{{ request.GET.broj_indeksa }}" name="broj_indeksa" placeholder="Broj indeksa" type="text" class="form-control">
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="input-group input-group-sm">
+                                    <input value="{{ request.GET.ime }}" name="ime" placeholder="Ime" type="text" class="form-control">
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="input-group input-group-sm">
+                                    <select name="godina_studija" class="form-control">
+                                        <option value="">Sve</option>
+                                        <option value="1" {% if request.get.godina_studija == '1' %}selected{% endif %}>1</option>
+                                        <option value="2" {% if request.get.godina_studija == '2' %}selected{% endif %}>2</option>
+                                        <option value="3" {% if request.get.godina_studija == '3' %}selected{% endif %}>3</option>
+                                    </select>
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="inline">
+                                    <div class="input-group input-group-sm mr-3">
+                                        <input value="{{ request.GET.prosek_ocena_od }}" name="prosek_ocena_od" placeholder="Od" type="text" class="form-control">
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <input value="{{ request.GET.prosek_ocena_do }}" name="prosek_ocena_do" placeholder="Do" type="text" class="form-control">
+                                    </div>
+                                </div>
+                            </th>
+                            <th scope="col" colspan="3">
+                                <div class="inline-btns">
+                                    <button type="submit" class="btn btn-primary btn-sm mr-3">Pretrazi</button>
+                                    <a role="button" class="btn btn-secondary btn-sm" href="{% url 'studenti' %}">Ponisti</a>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>
+                                <label for="order_by_broj_indeksa" class="header-btn">
+                                    Broj Indeksa
+                                </label>
+                                <input style="display: none;" id="order_by_broj_indeksa" value="broj_indeksa" class="header-btn" type="submit" name="order_by"/>
+                                {% if order_type == 'asc' and request.GET.order_by == 'broj_indeksa' %}
+                                    <i class="fas fa-sort-up"></i>
+                                    {% elif order_type == 'desc' and request.GET.order_by == 'broj_indeksa' %}
+                                        <i class="fas fa-sort-down"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort light-icon"></i>
+                                {% endif %}
+                            </th>
+                            <th scope="col">
+                                <label for="order_by_ime" class="header-btn">
+                                    Ime
+                                </label>
+                                {% if order_type == 'asc' and request.GET.order_by == 'ime' %}
+                                    <i class="fas fa-sort-up"></i>
+                                    {% elif order_type == 'desc' and request.GET.order_by == 'ime' %}
+                                        <i class="fas fa-sort-down"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort light-icon"></i>
+                                {% endif %}
+                                <input style="display: none;" id="order_by_ime" value="ime" class="header-btn" type="submit" name="order_by"/>
+                            </th>
+                            <th scope="col">
+                                <label for="order_by_prezime" class="header-btn">
+                                    Prezime
+                                </label>
+                                {% if order_type == 'asc' and request.GET.order_by == 'prezime' %}
+                                    <i class="fas fa-sort-up"></i>
+                                    {% elif order_type == 'desc' and request.GET.order_by == 'prezime' %}
+                                        <i class="fas fa-sort-down"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort light-icon"></i>
+                                {% endif %}
+                                <input style="display: none;" id="order_by_prezime" value="prezime" class="header-btn" type="submit" name="order_by"/>
+                            </th>
+                            <th scope="col">
+                                <label for="order_by_godina_studija" class="header-btn">
+                                    Godina Studija
+                                </label>
+                                {% if order_type == 'asc' and request.GET.order_by == 'godina_studija' %}
+                                    <i class="fas fa-sort-up"></i>
+                                    {% elif order_type == 'desc' and request.GET.order_by == 'godina_studija' %}
+                                        <i class="fas fa-sort-down"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort light-icon"></i>
+                                {% endif %}
+                                <input style="display: none;" id="order_by_godina_studija" value="godina_studija" class="header-btn" type="submit" name="order_by" />
+                            </th>
+                            <th scope="col">
+                                <label for="order_by_espb" class="header-btn">
+                                    ESPB
+                                </label>
+                                {% if order_type == 'asc' and request.GET.order_by == 'espb' %}
+                                    <i class="fas fa-sort-up"></i>
+                                    {% elif order_type == 'desc' and request.GET.order_by == 'espb' %}
+                                        <i class="fas fa-sort-down"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort light-icon"></i>
+                                {% endif %}
+                                <input style="display: none;" id="order_by_espb" value="espb" class="header-btn" type="submit" name="order_by"/>
+                            </th>
+                            <th scope="col">
+                                <label for="order_by_prosek_ocena" class="header-btn">
+                                    Prosek Ocena
+                                </label>
+                                {% if order_type == 'asc' and request.GET.order_by == 'prosek_ocena' %}
+                                    <i class="fas fa-sort-up"></i>
+                                    {% elif order_type == 'desc' and request.GET.order_by == 'prosek_ocena' %}
+                                        <i class="fas fa-sort-down"></i>
+                                        {% else %}
+                                            <i class="fas fa-sort light-icon"></i>
+                                {% endif %}
+                                <input style="display: none;" id="order_by_prosek_ocena" value="prosek_ocena" class="header-btn" type="submit" name="order_by"/>
+                            </th>
+                            <th scope="col">
+                                <label for="">
+                                    Akcije
+                                </label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <input name="prethodni_order_by" value="{{ request.GET.order_by }}" hidden />
+                    <input name="order_type" value="{{ order_type }}" hidden />
+                    <input name="page" value="{{ studenti.number }}" hidden />
+
+                </form>
+
+                <tbody>
+                    {% for student in studenti %}
+                    <tr>
+                        <td>{{ student.broj_indeksa }}</td>
+                        <td>{{ student.ime }}</td>
+                        <td>{{ student.prezime }}</td>
+                        <td>{{ student.godina_studija }}</td>
+                        <td>{{ student.espb }}</td>
+                        <td>{{ student.prosek_ocena }}</td>
+                        <td class="row" style="margin: 0;">
+                            <a href="{% url 'student' student.id %}" role="button" class=" text-primary mx-1">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if rola == 'administrator' %}
+                            <a href="{% url 'student_izmena' student.id %}" role="button" class=" text-warning mx-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="icon-btn red mx-1 delete_btn" data-toggle="modal" data-target=#deleteStudent{{ student.id }}>
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <!-- Modal za brisanje -->
+                    <div class="modal fade" id="deleteStudent{{ student.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            
+                            <div class="modal-body">
+                                Da li ste sigurni da zelite da obrisete studenta {{ student.ime }} {{ student.prezime }}?
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                            <form action="{% url 'student_brisanje' student.id %}" method="POST">
+                                {% csrf_token %}
+                                <button role="button" class="btn btn-danger">Obrisi</button  >
+                            </form>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <nav>
+            <ul class="pagination justify-content-center mt-3">
+                <li class="page-item {% if not studenti.has_previous %} disabled {% endif %}">
+                    <a class="page-link"
+                    {% if studenti.has_previous %}
+                        {% if 'order_by' not in args %}
+                        href="?page={{ studenti.previous_page_number }}"
+                        {% else %}
+                        href="?page={{ studenti.previous_page_number }}&prethodni_order_by={{ args.prethodni_order_by }}&order_type={{ args.order_type }}&order_by={{ args.order_by }}&broj_indeksa={{ args.broj_indeksa }}&ime={{ args.ime }}&godina_studija={{ args.godina_studija }}&prosek_ocena_od={{ args.prosek_ocena_do }}&prosek_ocena_do={{ args.prosek_ocena_od }}"
+                        {% endif %}
+                    {% endif %}>Prethodna</a>
+                </li>
+                <li class="page-item active">
+                    <a class="page-link" href="">
+                        {{ studenti.number }}
+                    </a>
+                </li>
+                <li class="page-item {% if not studenti.has_next %} disabled {% endif %}">
+                    <a class="page-link"
+                    {% if studenti.has_next %}
+                        {% if 'order_by' not in args %}
+                            href="?page={{ studenti.next_page_number }}"
+                        {% else %}
+                        href="?page={{ studenti.next_page_number }}&prethodni_order_by={{ args.prethodni_order_by }}&order_type={{ args.order_type }}&order_by={{ args.order_by }}&broj_indeksa={{ args.broj_indeksa }}&ime={{ args.ime }}&godina_studija={{ args.godina_studija }}&prosek_ocena_od={{ args.prosek_ocena_do }}&prosek_ocena_do={{ args.prosek_ocena_od }}"
+                        {% endif %}
+                    {% endif %}>Sledeca</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+{% endblock %}
