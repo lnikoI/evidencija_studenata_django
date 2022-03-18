@@ -89,7 +89,7 @@
                                         </button>
                                         {% endif %}
                                         {% if rola == 'student' or rola == 'administrator' %}
-                                        <a href="" role="button" class="text-secondary mx-1">
+                                        <a href="{% url 'reset_password' %}" role="button" class="text-secondary mx-1">
                                             <i class="fas fa-key"></i>
                                         </a>
                                         {% endif %}
@@ -132,6 +132,13 @@
                     </div>
                     {% if rola != 'student' %}
                     <div class="col-6 mt-5">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="mt-4 alert {% if message.tags %}alert-{% if message.tags == "error" %}danger{% else %}{{ message.tags}}{% endif %}" {% endif %}>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                         <form action="{% url 'ocena_nova' student.id %}" method="POST">
                             {% csrf_token %}
                             <div class="form-group">

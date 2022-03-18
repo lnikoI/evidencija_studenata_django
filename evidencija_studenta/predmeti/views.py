@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Avg
 from django.db import connection
 from django.core.paginator import Paginator
+from django.contrib import messages
 from .models import Predmeti, Ocene
 from studenti.models import Studenti
 from evidencija_studenta.utils import ulogovan, rola, getID
@@ -118,26 +119,31 @@ def predmet_brisanje(request, id):
 
 def ocena_nova(request, id):
     if rola(request) == 'administrator' or rola(request) == 'profesor':
-        #Fetch Ocene
-        ocena = Ocene()
-        ocena.ocena = request.POST['ocena']
-        ocena.datum = request.POST['datum']
-        ocena.predmet_id = request.POST['predmet_id']
-        ocena.student_id = id
-        ocena.save()
-        # Racunanje proseka ocena
-        student = Studenti.objects.get(pk=id)
-        prosek_ocena = Ocene.objects.filter(student_id=id).aggregate(Avg('ocena'))
-        student.prosek_ocena=round(prosek_ocena['ocena__avg'], 1)
-        # Racunanje ukupnih espb
-        cursor = connection.cursor()
-        upit = "SELECT SUM(espb) AS rezultat FROM predmeti_predmeti WHERE id IN (SELECT predmet_id FROM predmeti_ocene WHERE student_id=%s)"
-        cursor.execute(upit, [id])
-        ukupno_espb = cursor.fetchone()
-        student.espb = round(ukupno_espb[0], 1)
-        student.save(update_fields=['prosek_ocena', 'espb'])
-
-        return redirect('student', id)
+        predmet_check = request.POST['predmet_id']
+        ocene_check = Ocene.objects.filter(student_id=id, predmet_id=predmet_check)
+        if ocene_check.exists():
+            messages.error(request, 'Student vec ima unetu ocenu iz tog predmeta')
+            return redirect('student', id)
+        else:
+            #Fetch Ocene
+            ocena = Ocene()
+            ocena.ocena = request.POST['ocena']
+            ocena.datum = request.POST['datum']
+            ocena.predmet_id = request.POST['predmet_id']
+            ocena.student_id = id
+            ocena.save()
+            # Racunanje proseka ocena
+            student = Studenti.objects.get(pk=id)
+            prosek_ocena = Ocene.objects.filter(student_id=id).aggregate(Avg('ocena'))
+            student.prosek_ocena=round(prosek_ocena['ocena__avg'], 1)
+            # Racunanje ukupnih espb
+            cursor = connection.cursor()
+            upit = "SELECT SUM(espb) AS rezultat FROM predmeti_predmeti WHERE id IN (SELECT predmet_id FROM predmeti_ocene WHERE student_id=%s)"
+            cursor.execute(upit, [id])
+            ukupno_espb = cursor.fetchone()
+            student.espb = round(ukupno_espb[0], 1)
+            student.save(update_fields=['prosek_ocena', 'espb'])
+            return redirect('student', id)
     elif rola(request) == 'student':
         id = getID(request)
         return redirect('student', id)

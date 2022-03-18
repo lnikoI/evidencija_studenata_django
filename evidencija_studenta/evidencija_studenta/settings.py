@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'evidencija_studenta.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django_project_1',
+        'NAME': 'evidencija_studenata_django',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',
@@ -146,7 +146,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = '<email>'
-EMAIL_HOST_PASSWORD = '<password>'
+EMAIL_HOST_USER = 'web.programiranje.rer0119@gmail.com'
+EMAIL_HOST_PASSWORD = 'webprogramiranjerer0119'
 EMAIL_USE_TLS = True
 #EMAIL_USE_SSL = True
